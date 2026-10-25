@@ -1,28 +1,44 @@
 "use client";
 
-import { CheckCircle2, Circle, Loader2, Save, Send } from "lucide-react";
+import { BarChart3, CalendarDays, CheckCircle2, Circle, Loader2, Mail, Save, Send, Share2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Btn, FieldRow, inputClass, PageHeader, Panel, textareaClass } from "@/components/admin/ui";
+import { WhatsappIcon } from "@/components/site/icons";
+import { Btn, FieldRow, inputClass, PageHeader, Panel, TabBar, textareaClass, useHashTab, type TabDef } from "@/components/admin/ui";
 import { useSiteSettings } from "@/components/admin/use-settings";
 import type { TrackingSettings } from "@/lib/settings";
 import { adminTool, supabaseBrowser } from "@/lib/supabase/browser";
 
 type SecretField = { key: string; label: string; hint?: string; multiline?: boolean; secret?: boolean };
-type SecretGroup = { id: string; title: string; description: string; test?: string; fields: SecretField[] };
+type SecretGroup = {
+  id: "email" | "calendar" | "whatsapp" | "meta";
+  title: string;
+  description: string;
+  test?: string;
+  /** the service counts as connected when every key in one of these sets is saved */
+  connected: string[][];
+  steps: string[];
+  fields: SecretField[];
+};
 
 const groups: SecretGroup[] = [
   {
     id: "email",
     title: "Business email",
-    description: "Lead and booking notifications plus auto-replies. Use Resend (recommended) or your mailbox's SMTP on port 465.",
+    description: "Lead and booking notifications plus automatic replies to your clients.",
     test: "test_email",
+    connected: [["resend_api_key"], ["smtp_host", "smtp_user", "smtp_pass"]],
+    steps: [
+      "Easiest: create a Resend account and verify shafqat.pro under Domains, then paste an API key.",
+      "Or use your mailbox's SMTP details. Only port 465 works from Supabase (ports 25 and 587 are blocked).",
+      "Click “Send test” to confirm an email reaches your inbox.",
+    ],
     fields: [
       { key: "notify_email", label: "Send notifications to", hint: "Defaults to the contact email in Settings", secret: false },
-      { key: "email_from", label: "From address", hint: 'e.g. Shafqat Rasool <info@shafqat.pro> — domain must be verified with your provider', secret: false },
-      { key: "resend_api_key", label: "Resend API key", hint: "resend.com → API Keys (verify shafqat.pro under Domains)" },
-      { key: "smtp_host", label: "SMTP host", hint: "e.g. smtp.gmail.com / smtp.zoho.com / smtp.hostinger.com", secret: false },
-      { key: "smtp_port", label: "SMTP port", hint: "465 (SSL). Ports 25 & 587 are blocked on Supabase Edge Functions.", secret: false },
+      { key: "email_from", label: "From address", hint: "e.g. Shafqat Rasool <info@shafqat.pro>. The domain must be verified with your provider", secret: false },
+      { key: "resend_api_key", label: "Resend API key", hint: "resend.com → API Keys" },
+      { key: "smtp_host", label: "SMTP host", hint: "e.g. smtp.gmail.com, smtp.zoho.com, smtp.hostinger.com", secret: false },
+      { key: "smtp_port", label: "SMTP port", hint: "465 (SSL)", secret: false },
       { key: "smtp_user", label: "SMTP username", secret: false },
       { key: "smtp_pass", label: "SMTP password / app password" },
     ],
@@ -30,13 +46,19 @@ const groups: SecretGroup[] = [
   {
     id: "calendar",
     title: "Google Calendar",
-    description: "Creates events for every booking and blocks times you're busy. OAuth mode also invites the client and adds a Google Meet link.",
+    description: "Creates an event for every booking and blocks the times you're busy. OAuth mode also invites the client and adds a Google Meet link.",
     test: "test_calendar",
+    connected: [["google_client_id", "google_client_secret", "google_refresh_token"], ["google_service_account_json"]],
+    steps: [
+      "In Google Cloud Console, enable the Google Calendar API for your project.",
+      "Create an OAuth client and get a refresh token (scope: calendar), or create a service account and share your calendar with its email.",
+      "Click “Send test” to check the connection and your busy times.",
+    ],
     fields: [
-      { key: "google_calendar_id", label: "Calendar ID", hint: "Usually your Gmail / Workspace address, or 'primary' with OAuth", secret: false },
+      { key: "google_calendar_id", label: "Calendar ID", hint: "Usually your Gmail or Workspace address, or “primary” with OAuth", secret: false },
       { key: "google_client_id", label: "OAuth client ID", secret: false },
       { key: "google_client_secret", label: "OAuth client secret" },
-      { key: "google_refresh_token", label: "OAuth refresh token", hint: "Scope: https://www.googleapis.com/auth/calendar (get one via OAuth Playground)" },
+      { key: "google_refresh_token", label: "OAuth refresh token", hint: "Scope: https://www.googleapis.com/auth/calendar" },
       { key: "google_service_account_json", label: "…or service account JSON", hint: "Share your calendar with the service account email (Make changes to events)", multiline: true },
       { key: "default_meeting_link", label: "Fallback meeting link", hint: "Used when no Meet link is generated (e.g. your Zoom room)", secret: false },
     ],
@@ -44,38 +66,63 @@ const groups: SecretGroup[] = [
   {
     id: "whatsapp",
     title: "WhatsApp Cloud API",
-    description: "Instant WhatsApp alerts for new leads and bookings (Meta Business → WhatsApp → API Setup).",
+    description: "Instant WhatsApp alerts on your phone for every new lead and booking.",
     test: "test_whatsapp",
+    connected: [["whatsapp_token", "whatsapp_phone_number_id", "whatsapp_notify_to"]],
+    steps: [
+      "In Meta Business, open WhatsApp → API Setup and copy the Phone number ID.",
+      "Create a permanent access token (System User) and paste it here.",
+      "Set the number that should receive alerts, then click “Send test”.",
+    ],
     fields: [
       { key: "whatsapp_token", label: "Permanent access token" },
       { key: "whatsapp_phone_number_id", label: "Phone number ID", secret: false },
       { key: "whatsapp_notify_to", label: "Notify this number", hint: "International format, e.g. 923045101870", secret: false },
-      { key: "whatsapp_template", label: "Template name (optional)", hint: "Approved template with one {{1}} body variable — needed outside the 24h window", secret: false },
+      { key: "whatsapp_template", label: "Template name (optional)", hint: "An approved template with one {{1}} body variable. Needed outside the 24-hour window", secret: false },
       { key: "whatsapp_template_lang", label: "Template language", hint: "e.g. en or en_US", secret: false },
     ],
   },
   {
     id: "meta",
     title: "Meta Conversions API",
-    description: "Server-side Lead and Schedule events for Facebook & Instagram ads, deduplicated with the browser pixel.",
+    description: "Server-side Lead and Schedule events for Facebook and Instagram ads, matched with the browser pixel so conversions aren't double counted.",
+    connected: [["meta_capi_token"]],
+    steps: [
+      "Add your Pixel ID in the Ads & analytics tab first.",
+      "In Events Manager → your pixel → Settings, generate a Conversions API access token.",
+      "Use a test event code while testing, then clear it.",
+    ],
     fields: [
-      { key: "meta_capi_token", label: "Conversions API access token", hint: "Events Manager → your pixel → Settings → Generate access token" },
+      { key: "meta_capi_token", label: "Conversions API access token" },
       { key: "meta_test_event_code", label: "Test event code (optional)", hint: "Remove after testing", secret: false },
     ],
   },
 ];
 
-const trackingFields: { key: keyof TrackingSettings; label: string; hint: string }[] = [
-  { key: "gtmId", label: "Google Tag Manager ID", hint: "GTM-XXXXXXX" },
-  { key: "ga4Id", label: "Google Analytics 4 ID", hint: "G-XXXXXXXXXX" },
-  { key: "googleAdsId", label: "Google Ads ID", hint: "AW-XXXXXXXXX" },
-  { key: "googleAdsLeadLabel", label: "Google Ads lead conversion label", hint: "From the conversion action's tag setup" },
-  { key: "googleAdsBookingLabel", label: "Google Ads booking conversion label", hint: "Separate conversion for booked meetings" },
-  { key: "metaPixelId", label: "Meta (Facebook / Instagram) Pixel ID", hint: "Numbers only" },
-  { key: "googleSiteVerification", label: "Google Search Console verification", hint: "content value of the google-site-verification meta tag" },
-  { key: "bingSiteVerification", label: "Bing Webmaster verification", hint: "msvalidate.01 content value" },
-  { key: "facebookDomainVerification", label: "Facebook domain verification", hint: "facebook-domain-verification content value" },
+const trackingSections: { title: string; fields: { key: keyof TrackingSettings; label: string; hint: string }[] }[] = [
+  {
+    title: "Google",
+    fields: [
+      { key: "gtmId", label: "Google Tag Manager ID", hint: "GTM-XXXXXXX" },
+      { key: "ga4Id", label: "Google Analytics 4 ID", hint: "G-XXXXXXXXXX" },
+      { key: "googleAdsId", label: "Google Ads ID", hint: "AW-XXXXXXXXX" },
+      { key: "googleAdsLeadLabel", label: "Ads lead conversion label", hint: "From the conversion action's tag setup" },
+      { key: "googleAdsBookingLabel", label: "Ads booking conversion label", hint: "A separate conversion for booked meetings" },
+    ],
+  },
+  { title: "Meta (Facebook & Instagram)", fields: [{ key: "metaPixelId", label: "Meta Pixel ID", hint: "Numbers only" }] },
+  {
+    title: "Site verification",
+    fields: [
+      { key: "googleSiteVerification", label: "Google Search Console", hint: "Content value of the google-site-verification meta tag" },
+      { key: "bingSiteVerification", label: "Bing Webmaster", hint: "msvalidate.01 content value" },
+      { key: "facebookDomainVerification", label: "Facebook domain verification", hint: "facebook-domain-verification content value" },
+    ],
+  },
 ];
+
+const TAB_IDS = ["tracking", "email", "calendar", "whatsapp", "meta"] as const;
+type TabId = (typeof TAB_IDS)[number];
 
 // Only key names are read back for secrets; plain settings (hosts, IDs, addresses) are shown for editing.
 async function fetchKeys() {
@@ -93,11 +140,12 @@ async function fetchKeys() {
 
 export default function IntegrationsPage() {
   const { settings, setSettings, save, saving } = useSiteSettings();
+  const [tab, setTab] = useHashTab(TAB_IDS, "tracking");
   const [configured, setConfigured] = useState<Set<string>>(new Set());
   const [values, setValues] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState<string | null>(null);
 
-  const loadKeys = useCallback(
+  const reloadKeys = useCallback(
     () =>
       fetchKeys().then(({ keys, plain }) => {
         setConfigured(keys);
@@ -113,6 +161,20 @@ export default function IntegrationsPage() {
     });
   }, []);
 
+  const isConnected = (g: SecretGroup) => g.connected.some((set) => set.every((k) => configured.has(k)));
+  const tracking = settings?.tracking;
+  const trackingOn = Boolean(tracking && (tracking.gtmId || tracking.ga4Id || tracking.googleAdsId || tracking.metaPixelId));
+
+  const tabs: TabDef<TabId>[] = [
+    { id: "tracking", label: "Ads & analytics", icon: BarChart3, dot: trackingOn ? "ok" : "off" },
+    ...groups.map<TabDef<TabId>>((g) => ({
+      id: g.id,
+      label: g.title.replace("WhatsApp Cloud API", "WhatsApp").replace("Meta Conversions API", "Meta CAPI"),
+      icon: { email: Mail, calendar: CalendarDays, whatsapp: WhatsappIcon as unknown as typeof Mail, meta: Share2 }[g.id],
+      dot: isConnected(g) ? "ok" : "off",
+    })),
+  ];
+
   async function saveGroup(group: SecretGroup) {
     const entries = group.fields.map((f) => [f.key, values[f.key]] as const).filter(([, v]) => v !== undefined);
     if (entries.length === 0) return toast.info("Nothing changed");
@@ -127,8 +189,8 @@ export default function IntegrationsPage() {
     setBusy(null);
     const err = results.find((r) => r.error)?.error;
     if (err) return toast.error(err.message);
-    setValues((v) => Object.fromEntries(Object.entries(v).filter(([k]) => !group.fields.some((f) => f.key === k))));
-    await loadKeys();
+    setValues((v) => Object.fromEntries(Object.entries(v).filter(([k]) => !group.fields.some((f) => f.key === k && f.secret !== false))));
+    await reloadKeys();
     toast.success(`${group.title} saved`);
   }
 
@@ -137,7 +199,7 @@ export default function IntegrationsPage() {
     setBusy(`${group.id}-test`);
     try {
       const res = await adminTool<{ ok: boolean; error?: string; via?: string; mode?: string; busyNext7Days?: number; to?: string }>(group.test);
-      if (res.ok) toast.success(group.test === "test_calendar" ? `Connected (${res.mode}) — ${res.busyNext7Days} busy blocks in the next 7 days` : `Sent via ${res.via}${res.to ? ` to ${res.to}` : ""}`);
+      if (res.ok) toast.success(group.test === "test_calendar" ? `Connected (${res.mode}), ${res.busyNext7Days} busy blocks in the next 7 days` : `Sent via ${res.via}${res.to ? ` to ${res.to}` : ""}`);
       else toast.error(res.error ?? "Test failed");
     } catch (e) {
       toast.error((e as Error).message);
@@ -146,56 +208,68 @@ export default function IntegrationsPage() {
     }
   }
 
+  const active = groups.find((g) => g.id === tab);
+
   return (
     <>
-      <PageHeader title="Integrations" description="Ads tracking, business email, Google Calendar, WhatsApp, and Meta Conversions API." />
+      <PageHeader title="Integrations" description="Connect ads tracking, email, Google Calendar, WhatsApp and the Meta Conversions API." />
+      <TabBar tabs={tabs} value={tab} onChange={setTab} />
 
-      {settings && (
+      {tab === "tracking" && settings && tracking && (
         <Panel
           title="Ads & analytics tracking"
-          description="Loaded on every public page. Lead and booking conversions fire automatically for Google Ads, GA4, GTM and the Meta Pixel."
-          className="mb-6"
+          description="Loaded on every public page. Lead and booking conversions fire automatically for Google Ads, GA4, Tag Manager and the Meta Pixel."
           actions={<Btn onClick={() => save({ tracking: settings.tracking })} disabled={saving}>{saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Save</Btn>}
         >
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {trackingFields.map((f) => (
-              <FieldRow key={f.key} label={f.label} hint={f.hint}>
-                <input
-                  className={inputClass}
-                  value={settings.tracking[f.key] ?? ""}
-                  onChange={(e) => setSettings({ ...settings, tracking: { ...settings.tracking, [f.key]: e.target.value.trim() } })}
-                />
-              </FieldRow>
+          <div className="space-y-8">
+            {trackingSections.map((section) => (
+              <div key={section.title}>
+                <h3 className="mb-3 text-xs font-semibold tracking-wide text-slate-500 uppercase">{section.title}</h3>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {section.fields.map((f) => (
+                    <FieldRow key={f.key} label={f.label} hint={f.hint}>
+                      <input className={inputClass} value={tracking[f.key] ?? ""} onChange={(e) => setSettings({ ...settings, tracking: { ...settings.tracking, [f.key]: e.target.value.trim() } })} />
+                    </FieldRow>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </Panel>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {groups.map((group) => {
-          const done = group.fields.filter((f) => configured.has(f.key)).length;
-          return (
-            <Panel
-              key={group.id}
-              title={group.title}
-              description={group.description}
-              actions={<span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 whitespace-nowrap">{done}/{group.fields.length} set</span>}
-            >
-              <div className="grid gap-4">
-                {group.fields.map((f) => (
+      {active && (
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)]">
+          <Panel
+            title={active.title}
+            description={active.description}
+            actions={
+              <div className="flex gap-2">
+                {active.test && (
+                  <Btn variant="ghost" onClick={() => test(active)} disabled={busy === `${active.id}-test`}>
+                    {busy === `${active.id}-test` ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />} Send test
+                  </Btn>
+                )}
+                <Btn onClick={() => saveGroup(active)} disabled={busy === active.id}>
+                  {busy === active.id ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Save
+                </Btn>
+              </div>
+            }
+          >
+            <div className="grid gap-4 md:grid-cols-2">
+              {active.fields.map((f) => (
+                <div key={f.key} className={f.multiline ? "md:col-span-2" : undefined}>
                   <FieldRow
-                    key={f.key}
                     label={f.label}
                     hint={
-                      <span className="flex items-center gap-1.5">
-                        {configured.has(f.key) ? <CheckCircle2 className="size-3.5 text-emerald-500" /> : <Circle className="size-3.5 text-slate-300" />}
-                        {configured.has(f.key) ? "Saved — type to replace, or clear and save to remove." : f.hint ?? "Not set"}
-                        {configured.has(f.key) && f.hint ? ` ${f.hint}` : ""}
+                      <span className="flex items-start gap-1.5">
+                        {configured.has(f.key) ? <CheckCircle2 className="mt-0.5 size-3.5 shrink-0 text-emerald-500" /> : <Circle className="mt-0.5 size-3.5 shrink-0 text-slate-300" />}
+                        <span>{configured.has(f.key) ? `Saved. ${f.secret === false ? "" : "Type to replace, or clear and save to remove. "}${f.hint ?? ""}` : f.hint ?? "Not set"}</span>
                       </span>
                     }
                   >
                     {f.multiline ? (
-                      <textarea className={textareaClass} rows={3} placeholder={configured.has(f.key) ? "•••••••• (saved)" : ""} value={values[f.key] ?? ""} onChange={(e) => setValues({ ...values, [f.key]: e.target.value })} />
+                      <textarea className={textareaClass} rows={4} placeholder={configured.has(f.key) ? "•••••••• (saved)" : ""} value={values[f.key] ?? ""} onChange={(e) => setValues({ ...values, [f.key]: e.target.value })} />
                     ) : (
                       <input
                         className={inputClass}
@@ -207,20 +281,32 @@ export default function IntegrationsPage() {
                       />
                     )}
                   </FieldRow>
-                ))}
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <Btn onClick={() => saveGroup(group)} disabled={busy === group.id}>{busy === group.id ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} Save</Btn>
-                  {group.test && (
-                    <Btn variant="ghost" onClick={() => test(group)} disabled={busy === `${group.id}-test`}>
-                      {busy === `${group.id}-test` ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />} Send test
-                    </Btn>
-                  )}
                 </div>
-              </div>
+              ))}
+            </div>
+          </Panel>
+
+          <div className="space-y-6">
+            <Panel title="Status">
+              <p className={isConnected(active) ? "flex items-center gap-2 text-sm font-medium text-emerald-700" : "flex items-center gap-2 text-sm font-medium text-slate-600"}>
+                {isConnected(active) ? <CheckCircle2 className="size-4" /> : <Circle className="size-4" />}
+                {isConnected(active) ? "Connected" : "Not connected yet"}
+              </p>
+              <p className="mt-2 text-xs text-slate-500">{active.fields.filter((f) => configured.has(f.key)).length} of {active.fields.length} fields saved</p>
             </Panel>
-          );
-        })}
-      </div>
+            <Panel title="How to connect">
+              <ol className="space-y-3 text-sm text-slate-600">
+                {active.steps.map((s, i) => (
+                  <li key={s} className="flex gap-3">
+                    <span className="grid size-6 shrink-0 place-items-center rounded-full bg-navy-900 text-xs font-semibold text-sky-300">{i + 1}</span>
+                    <span>{s}</span>
+                  </li>
+                ))}
+              </ol>
+            </Panel>
+          </div>
+        </div>
+      )}
     </>
   );
 }
