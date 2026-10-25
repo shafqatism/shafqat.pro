@@ -1,5 +1,6 @@
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Quote, ShieldCheck } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BadgeCheck, CheckCircle2, Quote, ShieldCheck } from "lucide-react";
 import { FlipWords } from "@/components/aceternity/flip-words";
 import { HoverEffect } from "@/components/aceternity/hover-effect";
 import { Marquee } from "@/components/aceternity/marquee";
@@ -9,11 +10,11 @@ import { Spotlight } from "@/components/aceternity/spotlight";
 import { CapabilityTabs } from "@/components/home/capability-tabs";
 import { TopologyExplorer } from "@/components/home/topology-explorer";
 import { JsonLd } from "@/components/json-ld";
+import { ProductGlyph } from "@/components/site/product-icon";
 import { ServiceIcon } from "@/components/site/service-icon";
 import { ProjectCard } from "@/components/site/project-card";
 import { Eyebrow, SectionHeading } from "@/components/site/section";
-import { LazyHeroScene } from "@/components/three/lazy-hero-scene";
-import { faqs, highlights, process, profile, projects, services, stats, techMarquee } from "@/lib/content";
+import { faqs, highlights, process, productCatalog, profile, projectCategories, projects, services, stats, techMarquee } from "@/lib/content";
 import { pageMetadata } from "@/lib/seo";
 
 export async function generateMetadata() {
@@ -21,12 +22,16 @@ export async function generateMetadata() {
     path: "/",
     title: "Shafqat Rasool | Software Architect & Full-Stack Developer",
     description:
-      "Software architect and technology leader with 10+ years building custom software, Shopify Plus stores, SaaS platforms, iOS & Android apps, and cloud infrastructure on AWS & Azure.",
+      "Software architect with 10+ years building custom backends, web apps, multi-tenant SaaS, Shopify stores, iOS & Android apps and cloud infrastructure, plus ready-to-use business software.",
   });
 }
 
 export default function HomePage() {
   const featured = projects.filter((p) => p.featured).slice(0, 6);
+  const categoryCounts = projectCategories.map((c) => ({ name: c, count: projects.filter((p) => p.category === c).length }));
+  const flagship = ["clinic-management-system", "hospital-management-system", "education-management-system", "restaurant-management-system", "pos-management-system", "pharmaceutical-erp", "car-rental-solution", "ecommerce-multi-vendor"]
+    .map((slug) => productCatalog.find((p) => p.slug === slug))
+    .filter((p): p is (typeof productCatalog)[number] => Boolean(p));
 
   return (
     <>
@@ -36,53 +41,55 @@ export default function HomePage() {
         <div className="pointer-events-none absolute -top-32 left-1/4 h-[520px] w-[720px] rounded-full bg-navy-700/50 blur-[140px]" />
         <Spotlight className="-top-40 left-0 md:-top-20 md:left-60" />
 
-        <div className="relative mx-auto grid min-h-[100svh] max-w-6xl items-center gap-10 px-4 pt-28 pb-16 sm:px-6 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:pt-24">
+        <div className="relative mx-auto grid max-w-6xl items-end gap-6 px-4 pt-28 pb-8 sm:px-6 md:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] md:gap-4 md:pb-0 lg:pt-32">
           {/* CSS-only entrance so the LCP heading paints before hydration */}
-          <div>
+          <div className="self-center md:pb-12">
             <div className="animate-fade-up">
               <Eyebrow dark>{profile.role}</Eyebrow>
             </div>
             <div className="animate-fade-up [animation-delay:80ms]">
-              <h1 className="mt-6 text-[2.6rem] leading-[1.02] font-semibold sm:text-6xl xl:text-7xl">
+              <h1 className="mt-5 text-balance text-[2.4rem] leading-[1.04] font-semibold sm:text-5xl md:text-[2.6rem] lg:text-6xl xl:text-7xl">
                 I don&apos;t just write code.
                 <br />
                 <span className="text-gradient">I build what&apos;s next.</span>
               </h1>
             </div>
             <div className="animate-fade-up [animation-delay:160ms]">
-              <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/70">
+              <p className="mt-5 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
                 {profile.subheadline} Scalable{" "}
-                <FlipWords words={["SaaS platforms", "Shopify Plus stores", "iOS & Android apps", "cloud architectures", "enterprise systems"]} className="font-semibold text-sky-300" />
+                <FlipWords words={["SaaS platforms", "backend systems", "web apps", "Shopify stores", "iOS & Android apps", "cloud architectures", "business software"]} className="font-semibold text-sky-300" />
               </p>
             </div>
-            <div className="mt-9 flex animate-fade-up flex-wrap items-center gap-3 [animation-delay:240ms]">
+            <div className="mt-7 flex animate-fade-up flex-wrap items-center gap-3 [animation-delay:240ms]">
               <MovingBorderLink href="/book-a-meeting">
                 Book a free strategy call <ArrowRight className="size-4" />
               </MovingBorderLink>
               <Link href="/portfolio" className="inline-flex items-center gap-2 rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-white/90 transition hover:border-sky-400/60 hover:text-sky-300">
-                View 42 projects <ArrowUpRight className="size-4" />
+                View all {projects.length} projects <ArrowUpRight className="size-4" />
               </Link>
-            </div>
-            <div className="mt-12 grid max-w-xl animate-fade-up grid-cols-3 gap-4 border-t border-white/10 pt-8 [animation-delay:320ms]">
-              {stats.slice(0, 3).map((s) => (
-                <div key={s.label}>
-                  <p className="font-heading text-3xl font-semibold text-white sm:text-4xl">{s.value}</p>
-                  <p className="mt-1 text-xs text-white/55 sm:text-sm">{s.label}</p>
-                </div>
-              ))}
             </div>
           </div>
 
-          <div className="relative h-[340px] sm:h-[460px] lg:h-[560px]" aria-hidden>
-            <div className="absolute inset-0 animate-float">
-              <LazyHeroScene />
+          <div className="relative mx-auto w-full max-w-[300px] animate-fade-up self-end [animation-delay:200ms] md:max-w-none lg:max-w-[440px] lg:justify-self-end">
+            {/* glow behind the portrait so it sits in the scene instead of floating on it */}
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-4/5 rounded-full bg-sky-500/25 blur-[90px]" aria-hidden />
+            <div className="pointer-events-none absolute inset-x-8 top-10 bottom-0 rounded-t-[999px] bg-gradient-to-b from-navy-600/40 via-navy-800/30 to-transparent" aria-hidden />
+            <div className="relative aspect-[4/5] [mask-image:linear-gradient(to_bottom,black_82%,transparent_100%)]">
+              <Image
+                src="/images/shafqat-rasool-cutout.webp"
+                alt="Shafqat Rasool, software architect and technology leader"
+                fill
+                priority
+                sizes="(min-width: 1024px) 440px, (min-width: 768px) 40vw, 300px"
+                className="object-contain object-bottom drop-shadow-[0_20px_40px_rgba(56,189,248,0.18)]"
+              />
             </div>
-            <div className="absolute top-8 right-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs backdrop-blur-md sm:right-6">
-              <p className="text-white/50">Mobile Core Web Vitals</p>
+            <div className="absolute top-6 right-0 rounded-2xl border border-white/10 bg-navy-900/90 px-3 py-2 text-xs shadow-xl backdrop-blur-md lg:-right-4 lg:px-4 lg:py-3">
+              <p className="text-white/60">Mobile Core Web Vitals</p>
               <p className="font-heading text-2xl font-semibold text-sky-300">96/100</p>
             </div>
-            <div className="absolute bottom-10 left-0 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs backdrop-blur-md sm:left-4">
-              <p className="text-white/50">API routing latency</p>
+            <div className="absolute bottom-10 left-0 rounded-2xl border border-white/10 bg-navy-900/90 px-3 py-2 text-xs shadow-xl backdrop-blur-md lg:-left-4 lg:px-4 lg:py-3">
+              <p className="text-white/60">API routing latency</p>
               <p className="font-heading text-2xl font-semibold text-white">&lt;30ms</p>
             </div>
           </div>
@@ -134,7 +141,7 @@ export default function HomePage() {
       <section className="bg-white py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-            <SectionHeading eyebrow="02 · Services" title="How I can help" description="Founders, startups, and enterprises hire me to design, build, and scale modern digital products." />
+<SectionHeading eyebrow="02 · Services" title="How I can help" description="From backends and web apps to multi-tenant SaaS, mobile and cloud: founders, startups, and enterprises hire me to design, build, and scale modern digital products." />
             <Link href="/services" className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-navy-900 hover:text-sky-600">
               All services <ArrowRight className="size-4" />
             </Link>
@@ -153,9 +160,16 @@ export default function HomePage() {
                   </div>
                   <h3 className="mt-6 text-xl font-semibold text-ink">{s.title}</h3>
                   <p className="mt-3 text-sm leading-relaxed text-slate-600">{s.summary}</p>
+                  <ul className="mt-5 space-y-2 text-sm text-slate-700">
+                    {s.highlights.map((h) => (
+                      <li key={h} className="flex items-start gap-2.5">
+                        <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-sky-500" /> {h}
+                      </li>
+                    ))}
+                  </ul>
                   <div className="mt-auto flex flex-wrap gap-1.5 pt-6">
-                    {s.tech.slice(0, 4).map((t) => (
-                      <span key={t} className="rounded-md bg-navy-50 px-2 py-0.5 text-xs text-navy-700">{t}</span>
+                    {s.featuredTech.map((tech) => (
+                      <span key={tech} className="rounded-md bg-navy-50 px-2 py-0.5 text-xs text-navy-700">{tech}</span>
                     ))}
                   </div>
                 </Link>
@@ -165,17 +179,57 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ------------------------- Ready-to-use products ------------------------- */}
+      <section className="bg-slate-50 py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+            <div>
+              <SectionHeading eyebrow="03 · Products" title="Ready-to-use software, available today" description={`${productCatalog.length} proven management systems for healthcare, education, retail, distribution, HR and more, plus a custom ERP built on demand for any industry.`} />
+              <p className="mt-5 inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-sm font-medium text-emerald-700">
+                <BadgeCheck className="size-4" /> All products ready to use &amp; available
+              </p>
+            </div>
+            <Link href="/products" className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-navy-900 hover:text-sky-600">
+              All {productCatalog.length} products <ArrowRight className="size-4" />
+            </Link>
+          </div>
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {flagship.map((p, i) => (
+              <Reveal key={p.slug} delay={(i % 4) * 0.06} className="h-full">
+                <Link href={`/products#${p.slug}`} className="group flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-6 transition duration-300 hover:-translate-y-1 hover:border-navy-900/30 hover:shadow-[0_20px_50px_-20px_rgba(10,26,63,0.35)]">
+                  <span className="grid size-12 place-items-center rounded-2xl bg-navy-900 text-sky-300 transition group-hover:bg-sky-400 group-hover:text-ink">
+                    <ProductGlyph name={p.icon} className="size-6" />
+                  </span>
+                  <h3 className="mt-5 text-base font-semibold leading-snug text-ink">{p.name}</h3>
+                  <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-600">{p.summary}</p>
+                  <span className="mt-auto inline-flex items-center gap-1.5 pt-5 text-sm font-semibold text-navy-900">
+                    Learn more <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </span>
+                </Link>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ---------------------------- Featured work ---------------------------- */}
       <section className="relative overflow-hidden bg-ink py-24 text-white">
         <div className="pointer-events-none absolute inset-0 bg-dots opacity-30 mask-radial" />
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-            <SectionHeading dark eyebrow="03 · Selected work" title="Products used by millions" description="A few highlights from 42 shipped projects across mobile, e-commerce, and enterprise software." />
+            <SectionHeading dark eyebrow="04 · Selected work" title="Apps, stores and platforms that perform" description="A selection of mobile apps, e-commerce stores, and SaaS platforms built for speed, conversion, and scale." />
             <Link href="/portfolio" className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-sky-300 hover:text-sky-200">
               Full portfolio <ArrowRight className="size-4" />
             </Link>
           </div>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-8 flex flex-wrap gap-2">
+            {categoryCounts.map((c) => (
+              <li key={c.name} className="rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm text-white/80">
+                {c.name} <span className="font-semibold text-sky-300">{c.count}</span>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {featured.map((p, i) => (
               <Reveal key={p.slug} delay={(i % 3) * 0.08} className="h-full">
                 <ProjectCard project={p} dark />
@@ -202,7 +256,7 @@ export default function HomePage() {
       <section className="relative overflow-hidden bg-gradient-to-b from-navy-950 to-ink py-24">
         <div className="pointer-events-none absolute inset-0 bg-grid mask-radial opacity-60" />
         <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
-          <SectionHeading dark eyebrow="04 · Architecture topology" title="Every request, every layer, engineered." description="Hover the stack to explore how I design production systems — from the edge to the database." />
+          <SectionHeading dark eyebrow="05 · Architecture topology" title="Every request, every layer, engineered." description="Hover the stack to explore how I design production systems — from the edge to the database." />
           <TopologyExplorer />
         </div>
       </section>
@@ -210,7 +264,7 @@ export default function HomePage() {
       {/* ------------------------------ Process ------------------------------ */}
       <section className="bg-white py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <SectionHeading eyebrow="05 · How I work" title="From discovery to launch — and beyond" align="center" />
+          <SectionHeading eyebrow="06 · How I work" title="From discovery to launch — and beyond" align="center" />
           <ol className="relative mt-16 grid gap-6 md:grid-cols-4">
             <div aria-hidden className="absolute top-7 right-[12%] left-[12%] hidden h-px bg-gradient-to-r from-navy-900 via-sky-400 to-navy-900 md:block" />
             {process.map((p, i) => (
@@ -233,7 +287,7 @@ export default function HomePage() {
         <div className="pointer-events-none absolute -top-24 -right-24 size-96 rounded-full bg-sky-400/20 blur-3xl" />
         <div className="relative mx-auto max-w-4xl px-4 text-center sm:px-6">
           <Reveal>
-            <Eyebrow dark>06 · Philosophy</Eyebrow>
+            <Eyebrow dark>07 · Philosophy</Eyebrow>
             <h2 className="mt-6 text-3xl font-semibold sm:text-5xl">
               Good code solves problems. <span className="text-sky-300">Great thinking creates possibilities.</span>
             </h2>

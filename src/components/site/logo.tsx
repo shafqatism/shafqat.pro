@@ -1,7 +1,15 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-export function Logo({ className, dark = false }: { className?: string; dark?: boolean }) {
+export function Logo({ className, dark = false, variant = "mark" }: { className?: string; dark?: boolean; variant?: "mark" | "text" }) {
+  if (variant === "text") {
+    // name only, no badge
+    return (
+      <Link href="/" aria-label="Shafqat Rasool — home" className={cn("font-heading text-2xl font-bold tracking-tight transition-colors", dark ? "text-white hover:text-sky-300" : "text-navy-900 hover:text-navy-700", className)}>
+        Shafqat
+      </Link>
+    );
+  }
   return (
     <Link href="/" aria-label="Shafqat Rasool — home" className={cn("group flex items-center gap-2.5", className)}>
       <span className="relative grid size-9 place-items-center overflow-hidden rounded-xl bg-navy-900 font-heading text-sm font-bold text-white shadow-[0_0_0_1px_rgba(56,189,248,0.35)] transition-transform group-hover:scale-105">

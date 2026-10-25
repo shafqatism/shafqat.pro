@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CalendarCheck, Clock, Mail, MapPin } from "lucide-react";
 import { ContactForm } from "@/components/forms/contact-form";
 import { JsonLd } from "@/components/json-ld";
-import { WhatsappIcon } from "@/components/site/icons";
+import { FacebookIcon, InstagramIcon, LinkedinIcon, WhatsappIcon } from "@/components/site/icons";
 import { PageHero } from "@/components/site/section";
 import { profile } from "@/lib/content";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
@@ -24,6 +24,12 @@ export default async function ContactPage() {
     { icon: CalendarCheck, label: "Book a call", value: "Pick a time that suits you", href: "/book-a-meeting" },
   ];
 
+  const socials = [
+    { label: "Facebook", href: profile.socials.facebook, Icon: FacebookIcon, handle: "facebook.com/shafqatdotpro" },
+    { label: "Instagram", href: profile.socials.instagram, Icon: InstagramIcon, handle: "@shafqatpro" },
+    { label: "LinkedIn", href: profile.socials.linkedin, Icon: LinkedinIcon, handle: "in/shafqatism" },
+  ];
+
   return (
     <>
       <PageHero eyebrow="Contact" title={<>Let&apos;s build <span className="text-gradient">what&apos;s next.</span></>} description="Share a few details about your project and I'll get back to you within one business day with next steps." />
@@ -32,6 +38,31 @@ export default async function ContactPage() {
         <div className="mx-auto grid max-w-6xl gap-8 px-4 sm:px-6 lg:-mt-36 lg:grid-cols-[minmax(0,7fr)_minmax(0,4fr)]">
           <div className="relative z-10">
             <ContactForm />
+
+            <div className="mt-6 rounded-[2rem] border border-slate-200 bg-white p-6 sm:p-8">
+              <h2 className="font-heading text-lg font-semibold text-ink">Follow and connect</h2>
+              <p className="mt-1 text-sm text-slate-500">Prefer social media? Find me on these platforms.</p>
+              <ul className="mt-5 grid gap-3 sm:grid-cols-3">
+                {socials.map(({ label, href, Icon, handle }) => (
+                  <li key={label}>
+                    <a
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group flex items-center gap-3 rounded-2xl border border-slate-200 p-4 transition hover:border-navy-900 hover:bg-navy-900 hover:text-white"
+                    >
+                      <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-navy-900 text-sky-300 transition group-hover:bg-sky-400 group-hover:text-ink">
+                        <Icon className="size-5" />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-sm font-semibold">{label}</span>
+                        <span className="block truncate text-xs text-slate-500 group-hover:text-white/70">{handle}</span>
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
           <aside className="relative z-10 space-y-4 lg:pt-36">
             {channels.map((c) => (

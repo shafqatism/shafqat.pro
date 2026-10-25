@@ -46,8 +46,8 @@ export function BookingWidget({ config }: { config: BookingSettings }) {
   const [visitorTz] = useState(() => Intl.DateTimeFormat().resolvedOptions().timeZone || config.timezone);
   const [meetingType, setMeetingType] = useState(() => {
     const type = new URLSearchParams(window.location.search).get("type")?.toLowerCase();
-    // ?type= comes from service / project links; match on the topic's first word (e.g. "shopify", "mobile")
-    const match = type && config.meetingTypes.find((t) => t.toLowerCase() === type || type.includes(t.toLowerCase().match(/[a-z]+/)?.[0] ?? "\0"));
+    // ?type= comes from product / service / project links: exact topic name first, then a loose match on its first word
+    const match = type && (config.meetingTypes.find((t) => t.toLowerCase() === type) ?? config.meetingTypes.find((t) => type.includes(t.toLowerCase().match(/[a-z]+/)?.[0] ?? "\0")));
     return match || config.meetingTypes[0] || "Discovery Call";
   });
   const [date, setDate] = useState<string | null>(dates[0] ?? null);
@@ -59,6 +59,11 @@ export function BookingWidget({ config }: { config: BookingSettings }) {
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const topic = meetingTopics.find((t) => t.title === meetingType);
+  // /products links pass ?product=<name> so the notes start with what the visitor is interested in
+  const [defaultNotes] = useState(() => {
+    const product = new URLSearchParams(window.location.search).get("product");
+    return product ? `I'm interested in: ${product.slice(0, 120)}.\n\n` : "";
+  });
 
   const loadSlots = useCallback((d: string) => {
     setDate(d);
@@ -273,6 +278,7 @@ export function BookingWidget({ config }: { config: BookingSettings }) {
                   <Textarea
                     id="b-notes"
                     name="notes"
+                    defaultValue={defaultNotes}
                     required
                     minLength={10}
                     maxLength={5000}

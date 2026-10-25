@@ -8,23 +8,22 @@ import { getSettings } from "@/lib/settings";
 export async function generateMetadata() {
   return pageMetadata({
     path: "/portfolio",
-    title: "Portfolio — 42 Projects in Mobile, Shopify, SaaS & Custom Software",
+    title: "Portfolio — Mobile Apps, E-Commerce Stores & Platforms",
     description:
-      "Case studies and projects by Shafqat Rasool: iOS & Android apps with millions of users, Shopify Plus stores, enterprise e-commerce, ERP, and SaaS platforms.",
-    keywords: ["software portfolio", "mobile app case study", "Shopify Plus portfolio", "SaaS case study"],
+      "Projects by Shafqat Rasool: Flutter and Android apps on Google Play, Shopify, WooCommerce and Magento stores, WordPress and Laravel websites, healthcare platforms, and SaaS products.",
+    keywords: ["Flutter app developer", "Google Play apps", "web development portfolio", "Shopify portfolio", "WordPress portfolio", "Magento portfolio", "Laravel projects", "SaaS case study"],
   });
 }
 
 export default async function PortfolioPage() {
   const settings = await getSettings();
-  const mobile = projects.filter((p) => p.category === "Mobile Apps").length;
 
   return (
     <>
       <PageHero
         eyebrow="Portfolio"
-        title={<>{projects.length} projects. <span className="text-gradient">Millions of users.</span></>}
-        description={`A directory of shipped work — ${mobile} mobile apps on the App Store and Google Play, high-converting Shopify and custom e-commerce, and enterprise SaaS platforms.`}
+        title={<>{projects.length} projects. <span className="text-gradient">Built to perform.</span></>}
+        description="Mobile apps on Google Play, Shopify, WooCommerce and Magento stores, WordPress and Laravel websites, healthcare platforms, and SaaS products."
       />
       <section className="bg-white py-16 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -41,7 +40,7 @@ export default async function PortfolioPage() {
           mainEntity: {
             "@type": "ItemList",
             numberOfItems: projects.length,
-            itemListElement: projects.map((p, i) => ({ "@type": "ListItem", position: i + 1, url: `${settings.siteUrl}/portfolio/${p.slug}`, name: p.name })),
+            itemListElement: projects.map((p, i) => ({ "@type": "ListItem", position: i + 1, url: p.caseStudy ? `${settings.siteUrl}/portfolio/${p.slug}` : (p.links?.[0]?.href ?? `${settings.siteUrl}/portfolio`), name: p.name })),
           },
         }}
       />

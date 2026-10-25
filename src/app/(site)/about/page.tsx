@@ -4,7 +4,7 @@ import { CardBody, CardContainer, CardItem } from "@/components/aceternity/card-
 import { Reveal } from "@/components/aceternity/reveal";
 import { JsonLd } from "@/components/json-ld";
 import { PageHero, SectionHeading } from "@/components/site/section";
-import { capabilities, process, profile, projects, stats } from "@/lib/content";
+import { capabilities, process, profile, projects, services, stats } from "@/lib/content";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { getSettings } from "@/lib/settings";
 
@@ -29,8 +29,6 @@ const values = [
 
 export default async function AboutPage() {
   const settings = await getSettings();
-  const mobile = projects.filter((p) => p.category === "Mobile Apps").length;
-  const commerce = projects.filter((p) => ["Shopify", "WooCommerce", "Magento", "WordPress", "Custom Development"].includes(p.category)).length;
 
   return (
     <>
@@ -56,8 +54,8 @@ export default async function AboutPage() {
                 <CardItem translateZ={40} className="relative mt-8 grid grid-cols-3 gap-3">
                   {[
                     { v: "10+", l: "Years" },
-                    { v: String(mobile), l: "Apps" },
-                    { v: `${commerce}+`, l: "Web & commerce" },
+                    { v: String(projects.length), l: "Projects" },
+                    { v: String(services.length), l: "Services" },
                   ].map((s) => (
                     <div key={s.l} className="rounded-2xl border border-white/10 bg-white/5 p-3 text-center">
                       <p className="font-heading text-2xl font-semibold">{s.v}</p>

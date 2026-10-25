@@ -1,18 +1,20 @@
 import Link from "next/link";
 import { ArrowUpRight, Mail, Phone } from "lucide-react";
-import { navLinks, profile, services } from "@/lib/content";
+import { navLinks, productCatalog, profile, services } from "@/lib/content";
 import type { SiteSettings } from "@/lib/settings";
-import { FacebookIcon, GithubIcon, InstagramIcon, LinkedinIcon, WhatsappIcon } from "./icons";
+import { FacebookIcon, InstagramIcon, LinkedinIcon, WhatsappIcon } from "./icons";
 import { Logo } from "./logo";
 
 export function Footer({ settings }: { settings: SiteSettings }) {
   const socials = [
-    { href: profile.socials.linkedin, label: "LinkedIn", Icon: LinkedinIcon },
-    { href: profile.socials.github, label: "GitHub", Icon: GithubIcon },
-    { href: profile.socials.instagram, label: "Instagram", Icon: InstagramIcon },
-    { href: profile.socials.facebook, label: "Facebook", Icon: FacebookIcon },
     { href: `https://wa.me/${settings.whatsapp}`, label: "WhatsApp", Icon: WhatsappIcon },
+    { href: profile.socials.facebook, label: "Facebook", Icon: FacebookIcon },
+    { href: profile.socials.instagram, label: "Instagram", Icon: InstagramIcon },
+    { href: profile.socials.linkedin, label: "LinkedIn", Icon: LinkedinIcon },
   ];
+  const footerProducts = ["clinic-management-system", "hospital-management-system", "education-management-system", "pos-management-system", "pharmaceutical-erp", "custom-erp"]
+    .map((slug) => productCatalog.find((p) => p.slug === slug))
+    .filter((p): p is (typeof productCatalog)[number] => Boolean(p));
 
   return (
     <footer className="relative overflow-hidden bg-ink text-white">
@@ -28,15 +30,18 @@ export function Footer({ settings }: { settings: SiteSettings }) {
             <Link href="/book-a-meeting" className="inline-flex items-center gap-2 rounded-xl bg-sky-400 px-5 py-3 text-sm font-semibold text-ink transition hover:bg-sky-300">
               Book a Meeting <ArrowUpRight className="size-4" />
             </Link>
+            <Link href="/products" className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
+              Explore products
+            </Link>
             <Link href="/contact" className="inline-flex items-center gap-2 rounded-xl border border-white/20 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10">
               Send a message
             </Link>
           </div>
         </div>
 
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
           <div className="lg:col-span-1">
-            <Logo dark />
+            <Logo dark variant="text" />
             <p className="mt-4 text-sm leading-relaxed text-white/60">{profile.tagline}</p>
             <div className="mt-5 flex gap-2">
               {socials.map(({ href, label, Icon }) => (
@@ -64,9 +69,23 @@ export function Footer({ settings }: { settings: SiteSettings }) {
             <ul className="mt-4 space-y-2.5 text-sm text-white/60">
               {services.map((s) => (
                 <li key={s.slug}>
-                  <Link href={`/services#${s.slug}`} className="hover:text-sky-300">{s.title.split(" & ")[0]}</Link>
+                  <Link href={`/services#${s.slug}`} className="hover:text-sky-300">{s.title}</Link>
                 </li>
               ))}
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-sm font-semibold text-white">Products</h3>
+            <ul className="mt-4 space-y-2.5 text-sm text-white/60">
+              {footerProducts.map((p) => (
+                <li key={p.slug}>
+                  <Link href={`/products#${p.slug}`} className="hover:text-sky-300">{p.name}</Link>
+                </li>
+              ))}
+              <li>
+                <Link href="/products" className="font-medium text-sky-300 hover:text-sky-200">All {productCatalog.length} products →</Link>
+              </li>
             </ul>
           </div>
 

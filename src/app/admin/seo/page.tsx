@@ -14,13 +14,14 @@ const corePages = [
   { path: "/", label: "Home", context: "Homepage: hero, capabilities, services, featured work, architecture, process, FAQ." },
   { path: "/about", label: "About", context: "About Shafqat Rasool: story, stats, values, expertise and process." },
   { path: "/services", label: "Services", context: `Services: ${services.map((s) => `${s.title} (${s.tech.join(", ")})`).join("; ")}. Plus ERP, SaaS engine and API gateway products.` },
-  { path: "/portfolio", label: "Portfolio", context: `Portfolio of ${projects.length} projects across mobile apps, Shopify, custom development and SaaS.` },
+  { path: "/products", label: "Products", context: "Ready-to-use business software: clinic, hospital, education, LMS, law firm, POS, restaurant, distribution, warehouse, HR, project management, pharma ERP, custom ERP, marketing automation, car rental, multi-vendor." },
+  { path: "/portfolio", label: "Portfolio", context: `Portfolio of ${projects.length} projects: mobile apps, Shopify, WooCommerce, Magento, WordPress, Laravel, healthcare, real estate and SaaS.` },
   { path: "/contact", label: "Contact", context: "Contact form, email info@shafqat.pro, WhatsApp, replies within one business day." },
   { path: "/book-a-meeting", label: "Book a meeting", context: "Free discovery call booking with live availability and instant calendar invites." },
 ];
 const pages = [
   ...corePages,
-  ...projects.map((p) => ({ path: `/portfolio/${p.slug}`, label: p.name, context: `${p.name} (${p.category}, ${p.region}): ${p.caseStudy?.overview ?? p.summary} Stack: ${p.stack.join(", ")}.` })),
+  ...projects.map((p) => ({ path: `/portfolio/${p.slug}`, label: p.name, context: `${p.name} (${p.category}${p.region ? `, ${p.region}` : ""}): ${p.caseStudy?.overview ?? p.summary} Stack: ${p.stack.join(", ")}.` })),
 ];
 
 const empty = (path: string): PageSeo => ({ path, title: "", description: "", keywords: [], og_image: "", noindex: false });

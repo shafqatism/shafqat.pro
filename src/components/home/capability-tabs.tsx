@@ -1,12 +1,12 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { Boxes, Cloud, Rocket, ShoppingBag, Smartphone, Check } from "lucide-react";
+import { Boxes, Check, Cloud, Globe, Rocket, Smartphone } from "lucide-react";
 import { useState } from "react";
 import { capabilities } from "@/lib/content";
 import { cn } from "@/lib/utils";
 
-const icons = [Boxes, ShoppingBag, Smartphone, Cloud, Rocket];
+const icons = [Boxes, Globe, Smartphone, Cloud, Rocket];
 
 export function CapabilityTabs() {
   const [active, setActive] = useState(0);

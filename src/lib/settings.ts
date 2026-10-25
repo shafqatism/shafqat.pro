@@ -97,6 +97,7 @@ export const defaultSettings: SiteSettings = {
       "ERP & Business Automation",
       "Product Strategy & Technical Consulting",
       "Existing Project Support / Rescue",
+      "Ready-to-Use Software Demo",
       "Partnership / Something Else",
     ],
   },

@@ -30,7 +30,7 @@ export default function SettingsPage() {
           </div>
           <label className="mt-4 flex items-center gap-3 text-sm">
             <input type="checkbox" className="size-4 accent-navy-900" checked={settings.whatsappWidget} onChange={(e) => setSettings({ ...settings, whatsappWidget: e.target.checked })} />
-            Show the floating WhatsApp chat button on the website
+            Show the floating chat widget (WhatsApp, email, call) on the website
           </label>
         </Panel>
 

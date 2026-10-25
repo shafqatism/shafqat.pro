@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, Gauge } from "lucide-react";
+import { ArrowRight, BadgeCheck, CheckCircle2 } from "lucide-react";
 import { MovingBorderLink } from "@/components/aceternity/moving-border";
 import { Reveal } from "@/components/aceternity/reveal";
 import { JsonLd } from "@/components/json-ld";
-import { PageHero, SectionHeading } from "@/components/site/section";
+import { PageHero } from "@/components/site/section";
 import { ServiceIcon } from "@/components/site/service-icon";
-import { products, services } from "@/lib/content";
+import { services } from "@/lib/content";
 import { breadcrumbJsonLd, pageMetadata } from "@/lib/seo";
 import { getSettings } from "@/lib/settings";
 
@@ -15,7 +15,7 @@ export async function generateMetadata() {
     title: "Services — Software Architecture, Shopify, SaaS, Mobile & Cloud",
     description:
       "Custom software and API development, Shopify & Next.js websites, SaaS MVPs, iOS/Android/Flutter apps, AWS & Azure cloud engineering, and product strategy.",
-    keywords: ["software architecture services", "Shopify Plus developer", "SaaS MVP development", "Flutter app developer", "AWS cloud engineer"],
+    keywords: ["software architecture services", "NestJS developer", "Django REST Framework developer", "Go and Rust backend", "Next.js developer", "Remix and SvelteKit development", "multi-tenant SaaS development", "Shopify Plus developer", "Flutter app developer", "AWS cloud engineer", "Terraform and Kubernetes", "serverless AWS Lambda"],
   });
 }
 
@@ -96,39 +96,17 @@ export default async function ServicesPage() {
         </div>
       </section>
 
-      <section id="products" className="relative overflow-hidden bg-ink py-24 text-white">
+      <section className="relative overflow-hidden bg-ink py-20 text-white">
         <div className="pointer-events-none absolute inset-0 bg-grid mask-radial" />
-        <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
-          <SectionHeading dark eyebrow="Products" title="Ready-to-deploy platforms" description="Battle-tested foundations that cut months off your roadmap — licensed or custom-deployed for your business." />
-          <div className="mt-12 grid gap-6 lg:grid-cols-3">
-            {products.map((p, i) => (
-              <Reveal key={p.name} delay={i * 0.08} className="h-full">
-                <article className="flex h-full flex-col rounded-3xl border border-white/10 bg-gradient-to-b from-navy-900 to-navy-950 p-7 transition hover:border-sky-400/40 hover:shadow-[0_0_50px_-12px_rgba(56,189,248,0.4)]">
-                  <div className="flex items-center justify-between">
-                    <span className="rounded-full bg-sky-400/15 px-3 py-1 text-xs font-semibold text-sky-300">{p.category}</span>
-                    <span className="font-mono text-sm text-white/30">{p.number}</span>
-                  </div>
-                  <h3 className="mt-5 text-xl font-semibold">{p.name}</h3>
-                  <p className="mt-1 text-sm text-sky-200/80">{p.tagline}</p>
-                  <p className="mt-4 text-sm leading-relaxed text-white/65">{p.description}</p>
-                  <ul className="mt-5 space-y-2 text-sm text-white/80">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex gap-2"><CheckCircle2 className="mt-0.5 size-4 shrink-0 text-sky-400" />{f}</li>
-                    ))}
-                  </ul>
-                  <div className="mt-6 space-y-2 rounded-2xl border border-sky-400/20 bg-sky-400/5 p-4">
-                    {p.benchmarks.map((b) => (
-                      <p key={b} className="flex items-center gap-2 text-sm text-sky-100"><Gauge className="size-4 text-sky-400" />{b}</p>
-                    ))}
-                  </div>
-                  <div className="mt-5 flex flex-wrap gap-1.5">
-                    {p.stack.map((t) => <span key={t} className="rounded-md bg-white/5 px-2 py-0.5 text-xs text-white/60">{t}</span>)}
-                  </div>
-                  <p className="mt-auto pt-6 text-xs text-white/40">{p.licensing} · {p.useCases.join(" · ")}</p>
-                </article>
-              </Reveal>
-            ))}
+        <div className="relative mx-auto flex max-w-6xl flex-col items-start justify-between gap-8 px-4 sm:px-6 md:flex-row md:items-center">
+          <div>
+            <p className="inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-300"><BadgeCheck className="size-3.5" /> Ready to use &amp; available</p>
+            <h2 className="mt-4 text-3xl font-semibold sm:text-4xl">Prefer software that&apos;s ready today?</h2>
+            <p className="mt-3 max-w-xl text-white/70">Clinic, hospital, education, restaurant, POS, distribution, warehouse, HR, pharma ERP, car rental and multi-vendor systems, plus custom ERP on demand.</p>
           </div>
+          <Link href="/products" className="inline-flex items-center gap-2 rounded-xl bg-sky-400 px-6 py-3 text-sm font-semibold text-ink transition hover:bg-sky-300">
+            Explore products <ArrowRight className="size-4" />
+          </Link>
         </div>
       </section>
 

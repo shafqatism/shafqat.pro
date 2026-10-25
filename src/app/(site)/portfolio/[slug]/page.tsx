@@ -17,13 +17,15 @@ export async function generateMetadata({ params }: PageProps<"/portfolio/[slug]"
   const { slug } = await params;
   const project = projects.find((p) => p.slug === slug);
   if (!project) return {};
-  return pageMetadata({
+  const meta = await pageMetadata({
     path: `/portfolio/${project.slug}`,
     title: `${project.name}${project.caseStudy ? " — Case Study" : ""}`,
     description: project.caseStudy ? `${project.caseStudy.problem} ${project.caseStudy.solution}`.slice(0, 300) : `${project.summary} Built with ${project.stack.slice(0, 4).join(", ")}.`,
     keywords: [project.category, ...project.stack],
     type: "article",
   });
+  // pages without a real case study are thin: keep them out of search results
+  return project.caseStudy ? meta : { ...meta, robots: { index: false, follow: true } };
 }
 
 export default async function ProjectPage({ params }: PageProps<"/portfolio/[slug]">) {
@@ -36,7 +38,7 @@ export default async function ProjectPage({ params }: PageProps<"/portfolio/[slu
 
   return (
     <>
-      <PageHero eyebrow={`${project.category} · ${project.region}`} title={project.name} description={cs?.overview ?? project.summary}>
+      <PageHero eyebrow={project.region ? `${project.category} · ${project.region}` : project.category} title={project.name} description={cs?.overview ?? project.summary}>
         <div className="mt-8 flex flex-wrap gap-3">
           {project.links?.map((l) => (
             <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-xl bg-sky-400 px-4 py-2.5 text-sm font-semibold text-ink hover:bg-sky-300">
@@ -100,7 +102,7 @@ export default async function ProjectPage({ params }: PageProps<"/portfolio/[slu
                 {cs?.client && (<div><dt className="text-slate-500">Client</dt><dd className="font-semibold text-ink">{cs.client}</dd></div>)}
                 {cs?.role && (<div><dt className="text-slate-500">Role</dt><dd className="font-semibold text-ink">{cs.role}</dd></div>)}
                 <div><dt className="text-slate-500">Category</dt><dd className="font-semibold text-ink">{project.category}</dd></div>
-                <div><dt className="text-slate-500">Region</dt><dd className="font-semibold text-ink">{project.region}</dd></div>
+                {project.region && <div><dt className="text-slate-500">Region</dt><dd className="font-semibold text-ink">{project.region}</dd></div>}
               </dl>
               <h3 className="mt-6 flex items-center gap-2 text-sm font-semibold text-ink"><Wrench className="size-4 text-sky-500" /> Tech stack</h3>
               <div className="mt-3 flex flex-wrap gap-1.5">
@@ -138,13 +140,12 @@ export default async function ProjectPage({ params }: PageProps<"/portfolio/[slu
       <JsonLd
         data={{
           "@context": "https://schema.org",
-          "@type": project.category === "Mobile Apps" ? "SoftwareApplication" : "CreativeWork",
+          "@type": "CreativeWork",
           name: project.name,
           description: cs?.overview ?? project.summary,
           url: `${settings.siteUrl}/portfolio/${project.slug}`,
           creator: { "@id": `${settings.siteUrl}/#person` },
           keywords: project.stack.join(", "),
-          ...(project.category === "Mobile Apps" ? { applicationCategory: "MobileApplication", operatingSystem: project.links?.map((l) => (l.label === "App Store" ? "iOS" : "Android")).join(", ") } : {}),
           ...(project.links?.[0] ? { sameAs: project.links.map((l) => l.href) } : {}),
         }}
       />

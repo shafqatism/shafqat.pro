@@ -33,10 +33,10 @@ export function Navbar() {
         aria-label="Main"
         className={cn(
           "mx-auto flex h-14 max-w-6xl items-center justify-between rounded-2xl border px-3 transition-all duration-300 sm:px-4",
-          scrolled ? "border-navy-900/10 bg-white/80 shadow-lg shadow-navy-900/5 backdrop-blur-xl" : "border-transparent bg-white/60 backdrop-blur-md",
+          scrolled ? "border-slate-200 bg-white shadow-lg shadow-navy-900/10" : "border-slate-200 bg-white shadow-sm",
         )}
       >
-        <Logo />
+        <Logo variant="text" />
 
         <ul className="hidden items-center gap-1 md:flex">
           {navLinks.map((link) => (
@@ -45,13 +45,13 @@ export function Navbar() {
                 href={link.href}
                 className={cn(
                   "relative rounded-full px-3.5 py-2 text-sm font-medium transition-colors",
-                  isActive(link.href) ? "text-navy-900" : "text-slate-600 hover:text-navy-900",
+                  isActive(link.href) ? "text-white" : "text-slate-600 hover:text-navy-900",
                 )}
               >
                 {isActive(link.href) && (
-                  <motion.span layoutId="nav-pill" className="absolute inset-0 -z-10 rounded-full bg-navy-50 ring-1 ring-navy-900/10" transition={{ type: "spring", stiffness: 380, damping: 30 }} />
+                  <motion.span layoutId="nav-pill" className="absolute inset-0 rounded-full bg-navy-900" transition={{ type: "spring", stiffness: 380, damping: 30 }} />
                 )}
-                {link.label}
+                <span className="relative">{link.label}</span>
               </Link>
             </li>
           ))}
@@ -86,13 +86,13 @@ export function Navbar() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.18 }}
-            className="mx-auto mt-2 max-w-6xl overflow-hidden rounded-2xl border border-white/10 bg-navy-950/95 p-2 shadow-2xl backdrop-blur-xl md:hidden"
+            className="mx-auto mt-2 max-w-6xl overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl shadow-navy-900/15 md:hidden"
           >
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={cn("block rounded-xl px-4 py-3 text-base font-medium", isActive(link.href) ? "bg-white/10 text-sky-300" : "text-white/85 hover:bg-white/5")}
+                className={cn("block rounded-xl px-4 py-3 text-base font-medium", isActive(link.href) ? "bg-navy-900 text-white" : "text-slate-700 hover:bg-navy-50 hover:text-navy-900")}
               >
                 {link.label}
               </Link>

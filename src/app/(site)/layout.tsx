@@ -1,7 +1,7 @@
 import { JsonLd } from "@/components/json-ld";
 import { Footer } from "@/components/site/footer";
 import { Navbar } from "@/components/site/navbar";
-import { WhatsappFab } from "@/components/site/whatsapp-fab";
+import { ChatWidget } from "@/components/site/chat-widget";
 import { Analytics } from "@/components/tracking/analytics";
 import { personJsonLd } from "@/lib/seo";
 import { getSettings } from "@/lib/settings";
@@ -17,7 +17,7 @@ export default async function SiteLayout({ children }: LayoutProps<"/">) {
       <Navbar />
       <main id="main">{children}</main>
       <Footer settings={settings} />
-      {settings.whatsappWidget && <WhatsappFab number={settings.whatsapp} />}
+      {settings.whatsappWidget && <ChatWidget whatsapp={settings.whatsapp} phone={settings.phone} email={settings.contactEmail} />}
       <JsonLd data={personJsonLd(settings)} />
       <Analytics tracking={settings.tracking} />
     </>

@@ -61,7 +61,7 @@ export function personJsonLd(settings: SiteSettings) {
         url: settings.siteUrl,
         email: `mailto:${settings.contactEmail}`,
         telephone: settings.phone,
-        image: `${settings.siteUrl}/opengraph-image`,
+        image: `${settings.siteUrl}/images/shafqat-rasool.webp`,
         sameAs: Object.values(profile.socials),
         knowsAbout: ["Software Architecture", "Shopify Plus", "SaaS Development", "Mobile App Development", "Cloud Engineering", "FastAPI", "Next.js", "Flutter", "AWS", "Azure"],
       },
